@@ -200,4 +200,43 @@ node_types:
           implementation: https://raw.githubusercontent.com/maricaantonacci/egi-ace/main/tosca/base/artifacts/configure_users.yml
           inputs:
             os_users: { get_property: [ SELF, os_users] }
+            
+  tosca.nodes.indigo.DockerCompose:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      docker_compose_version:
+        type: version
+        required: no
+        default: 1.24.1
+      docker_compose_file_url:
+        type: string
+        required: yes
+      environment_variables:
+        required: no
+        default: []
+        type: list
+        entry_schema:
+          type: map
+          entry_schema:
+            type: string
+      project_name:
+        type: string
+        required: yes
+    artifacts:
+      docker_role:
+        file: indigo-dc.docker
+        type: tosca.artifacts.AnsibleGalaxy.role
+    interfaces:
+      Standard:
+        configure:
+          implementation: https://raw.githubusercontent.com/maricaantonacci/egi-ace/main/tosca/custom/artifacts/docker-compose_configure.yml
+          inputs:
+            project_name:  { get_property: [ SELF, project_name ] }
+            environment_variables: { get_property: [ SELF, environment_variables ] }
+        start:
+          implementation: https://raw.githubusercontent.com/maricaantonacci/egi-ace/main/tosca/custom/artifacts/docker-compose_start.yml
+          inputs:
+            docker_compose_version: { get_property: [ SELF, docker_compose_version ] }
+            docker_compose_file_url:  { get_property: [ SELF, docker_compose_file_url ] }
+            project_name:  { get_property: [ SELF, project_name ] }            
         
